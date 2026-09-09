@@ -48,31 +48,24 @@ Python, Pandas (vectorized, no apply), NumPy, Scikit-learn (DBSCAN, KMeans), Plo
 
 ### Project Structure
 
-uber-trips-analysis/
+## Project Structure
 
+```text
+Uber-Trips-Analysis-/
 ├── README.md
-
 ├── requirements.txt
-
 ├── .gitignore
-
 ├── data/
-
 │   └── README.md
-
 ├── notebooks/
-
 │   └── 01_frequent_pins_analysis.ipynb
-
 ├── src/
-
 │   ├── data_cleaning.py
-
 │   ├── clustering.py
-
 │   └── visualization.py
-
-└── outputs/figures/
+└── outputs/
+    └── figures/
+```
 
 ### Installation & Usage
 ```bash
@@ -83,23 +76,20 @@ pip install -r requirements.txt
 jupyter notebook notebooks/01_frequent_pins_analysis.ipynb
 ```
 
-Limitations
-•  Single city (Lima), 2010 data - not generalizable to current Uber
+## Limitations
 
-•  No ground truth for "true frequent pin" - evaluation is visual/distribution based
+- **Single city & old data:** 23k trips only from Lima (2010) — not generalizable to current global Uber usage
+- **No ground truth:** No labeled "home/office" data, so evaluation is visual & distribution-based, not accuracy-based
+- **GPS noise:** Up to ~100m error in start/end pins, can merge nearby locations
+- **Feature scope:** Price/distance/time deliberately excluded to keep clustering purely geospatial (for interview clarity)
 
-•  GPS noise up to ∼100m
+## Future Work
 
-•  Price/distance features not used for clustering (future work)
-Future Improvements
-
-•  Add k-distance plot to justify eps=100m empirically
-
-•  Silhouette score comparison
-
-•  Temporal clustering (weekday vs weekend pins)
-
-•  Use distance/price for trip segmentation
+- **Empirical eps tuning:** Add k-distance elbow plot to justify eps=100m statistically, not just research-based
+- **Quantitative comparison:** Silhouette score & Davies-Bouldin Index for DBSCAN vs K-Means (k=5)
+- **Temporal layer:** Separate weekday vs weekend pins to detect work vs home patterns
+- **Business extension:** Use price + distance features for trip segmentation (short commutes vs airport trips)
+- **Scale:** Test on multi-city dataset & deploy as Streamlit app with interactive map
 
 Author
 
