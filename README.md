@@ -1,79 +1,36 @@
-# Uber Trips Analysis: frequent locations per user
+# Uber Trips Analysis
 
-This project explores whether repeated start and end locations in an Uber trip history can be grouped into useful frequent-location candidates for each user.
+A geospatial clustering project exploring how repeated trip endpoints can be grouped into frequent user locations using DBSCAN and a K-Means baseline.
 
-It is an exploratory geospatial analysis, not a production recommendation system. The repository does not include the original dataset, so the analysis cannot be reproduced until the data is obtained from its source.
+This repository focuses on per-user location clustering from ride data and is designed as a practical data-analysis project rather than a production recommendation system.
 
 ## Problem
 
-A rider may repeatedly use the same locations. The analysis tests whether simple clustering of historical trip endpoints can identify those repeated locations without assigning labels such as `home` or `office`.
-
-## Dataset
-
-The code expects the Uber Peru 2010 export as a semicolon-delimited CSV with European decimal commas. Obtain the dataset from its permitted source and place it somewhere outside version control, for example:
-
-```text
-data/uber_peru_2010.csv
-```
-
-The required columns are:
-
-- `user_id`
-- `start_at`, `end_at`
-- `start_lat`, `start_lon`
-- `end_lat`, `end_lon`
-
-Other columns are retained when present. Do not commit the dataset unless its license permits redistribution.
+Riders often repeat the same places over time. This project tests whether historical trip endpoints can be grouped into recurring locations without needing to predefine the number of clusters.
 
 ## Approach
 
-1. Read the export using its delimiter and decimal conventions.
-2. Validate required columns and numeric coordinate values.
-3. Remove rows with missing timestamps or endpoint coordinates.
-4. Remove coordinates outside valid latitude/longitude ranges.
-5. Restrict the analysis to the Lima bounding box used by this dataset.
-6. Stack start and end points for each user.
-7. Run DBSCAN separately for each user using haversine distance.
-8. Run fixed-`k=5` K-Means as a simple comparison baseline, not as an objectively correct choice.
-9. Write per-user summaries to `outputs/`.
+The pipeline performs the following steps:
 
-## Clustering methodology
+1. Load trip data and normalize column names
+2. Validate numeric coordinates and timestamps
+3. Remove invalid or out-of-range rows
+4. Restrict analysis to the Lima bounding box
+5. Stack start and end coordinates for each user
+6. Run DBSCAN with haversine distance
+7. Run a fixed-k K-Means baseline for comparison
+8. Output per-user clustering summaries
 
-DBSCAN is useful here because it can mark isolated points as noise and does not require the number of locations to be known in advance. Coordinates are converted to radians and compared with the haversine metric. The default `eps` is 100 metres and `min_samples` is 2; these are explicit heuristics, not experimentally proven optimal values.
+## Tech Stack
 
-K-Means is included only as a fixed-`k` baseline. It forces every point into a cluster and is therefore not expected to represent irregular or noisy location histories as naturally as DBSCAN.
+- Python
+- pandas
+- NumPy
+- scikit-learn
+- Plotly
+- Jupyter-style exploratory workflow
 
-## Results
-
-Results are generated locally rather than written in advance. Run the analysis and inspect:
-
-- `outputs/dbscan_user_summary.csv`
-- `outputs/kmeans_user_summary.csv`
-
-The script prints the number of loaded and removed rows and summary statistics. This repository does not claim a particular cluster count, noise percentage, commuting pattern, or demand pattern without a committed run output that supports it.
-
-There is no ground-truth label for the correct frequent locations, so this project does not report classification accuracy. Any future clustering comparison should define a valid user-level evaluation before reporting a single aggregate metric.
-
-## How to run
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
-python run_analysis.py data/uber_peru_2010.csv
-```
-
-On Windows, activate the environment with `.venv\\Scripts\\activate`.
-
-## Limitations
-
-- The analysis is limited to one historical city dataset.
-- A 100-metre radius can merge nearby places or split the same place when GPS noise is high.
-- A cluster is only a repeated geographic location; it is not automatically a meaningful place label.
-- Users with too few endpoints are skipped.
-- The current script writes summaries but does not claim a validated recommendation-quality measure.
-
-## Project structure
+## Project Structure
 
 ```text
 src/
@@ -82,4 +39,44 @@ src/
   visualization.py
 run_analysis.py
 requirements.txt
+tests/
+  test_pipeline.py
+data/
+  sample_raw.csv
 ```
+
+## Running the project
+
+Create a virtual environment and install dependencies:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+```
+
+Run the sample pipeline:
+
+```bash
+python run_analysis.py --input data/sample_raw.csv --output-dir outputs/
+```
+
+Run tests:
+
+```bash
+pytest -q
+```
+
+## Notes
+
+- This repository does not include the original Uber Peru dataset.
+- No ground-truth labels are provided for “correct” locations.
+- DBSCAN is used as the primary method because it handles noise and does not require a predetermined cluster count.
+- K-Means is included only as a comparison baseline and is not treated as the more correct method.
+
+## Limitations
+
+- The project is limited to a single city dataset.
+- 100m clustering can merge nearby places or split noisy points.
+- A cluster is a repeated location pattern, not automatically a named place such as home or office.
+- This project is exploratory and not a production recommendation service.
