@@ -6,7 +6,6 @@ import argparse
 from pathlib import Path
 
 import pandas as pd
-from sklearn.metrics import silhouette_score
 
 from src.clustering import cluster_user_pins
 from src.data_cleaning import add_temporal_features, clean_coordinates, load_uber_data
@@ -31,8 +30,7 @@ def main() -> None:
     args = parser.parse_args()
 
     raw = load_uber_data(args.dataset)
-    clean = clean_coordinates(raw)
-    clean = add_temporal_features(clean)
+    clean = add_temporal_features(clean_coordinates(raw))
     print(f"Rows loaded: {len(raw)}")
     print(f"Rows removed during cleaning: {len(raw) - len(clean)}")
     print(f"Users retained: {clean['user_id'].nunique()}")
@@ -48,7 +46,6 @@ def main() -> None:
     print("K-Means summary:")
     print(kmeans.describe(include="all") if not kmeans.empty else "No users had enough pins")
     print("No accuracy metric is reported: the dataset has no labels for correct frequent locations.")
-    print("A silhouette score requires a chosen per-user representation and is not aggregated here.")
 
 
 if __name__ == "__main__":

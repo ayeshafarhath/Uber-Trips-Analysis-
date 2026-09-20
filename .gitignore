@@ -1,13 +1,7 @@
-# Data - don't upload big CSV
-data/*.csv
-!data/README.md
-
-# Python junk
 __pycache__/
-*.pyc
-*.pyo
-.env
-.venv
+*.py[cod]
+.venv/
 venv/
+env/
+outputs/
 .ipynb_checkpoints/
-.DS_Store

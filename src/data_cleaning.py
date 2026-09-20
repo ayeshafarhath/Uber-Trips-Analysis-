@@ -39,11 +39,7 @@ def load_uber_data(path: str | Path) -> pd.DataFrame:
 
 
 def clean_coordinates(df: pd.DataFrame) -> pd.DataFrame:
-    """Clean coordinates and timestamps while preserving a predictable schema.
-
-    Rows with missing or invalid coordinates, or unparseable timestamps, are removed.
-    The caller can compare lengths before and after this function to report removals.
-    """
+    """Clean coordinates and timestamps while preserving a predictable schema."""
     missing = sorted(REQUIRED_COLUMNS - set(df.columns))
     if missing:
         raise ValueError(f"Dataframe is missing required columns: {', '.join(missing)}")
@@ -80,11 +76,14 @@ def clean_coordinates(df: pd.DataFrame) -> pd.DataFrame:
 
 
 def add_temporal_features(df: pd.DataFrame) -> pd.DataFrame:
-    """Add simple time features to a cleaned trip dataframe."""
-    if "start_at" not in df or not pd.api.types.is_datetime64_any_dtype(df["start_at"]):
-        raise ValueError("start_at must be parsed datetime values before adding features")
+    """Add time features after coercing the start timestamp to datetime."""
+    if "start_at" not in df:
+        raise ValueError("start_at is required before adding temporal features")
     result = df.copy()
-    result["hour"] = result["start_at"].dt.hour
+    result["start_at"] = pd.to_datetime(result["start_at"], errors="coerce")
+    if result["start_at"].isna().any():
+        raise ValueError("start_at contains unparseable timestamps")
+    result["hour"] = result["start_at"].dt.hour.astype("int64")
     result["weekday"] = result["start_at"].dt.day_name()
     result["is_weekend"] = result["start_at"].dt.weekday >= 5
     return result
